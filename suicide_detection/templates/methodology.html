@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Methodology{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Project Methodology</h2>
+    <p style="color:var(--text-muted);">Chapter 7 — System Design and Implementation Pipeline</p>
+  </div>
+
+  <!-- Pipeline steps -->
+  {% set steps = [
+    ('bi-database-fill','#4f46e5','Stage 1: Data Collection',
+     'The Kaggle Suicide and Depression Detection dataset is used, containing approximately 232,074 labeled Reddit posts from r/SuicideWatch and r/depression. Each post is labeled as either <em>suicidal</em> or <em>non-suicidal</em>. The dataset is downloaded in CSV format and loaded into the Python environment.',
+     ['Source: Kaggle (nikhileswarkomati/suicide-watch)', 'Total: ~232,074 social media posts', 'Classes: Suicidal / Non-Suicidal (binary)', 'Split: 80% Train / 20% Test', 'Language: English']),
+    ('bi-tools','#0ea5e9','Stage 2: Data Preprocessing',
+     'Raw social media text contains noise (URLs, HTML, punctuation) that degrades model performance. A systematic preprocessing pipeline is applied to clean and normalize the data before analysis.',
+     ['Lowercase conversion for uniformity', 'URL and HTML tag removal', 'Punctuation and special character removal', 'Stop-word removal (NLTK built-in list)', 'Tokenization → individual word tokens', 'Lemmatization (e.g. crying → cry)']),
+    ('bi-graph-up','#10b981','Stage 3: Feature Extraction',
+     'Text must be converted to numerical form. Two techniques are employed: TF-IDF for the baseline model, and GloVe word embeddings for the LSTM deep learning model.',
+     ['TF-IDF: max 5000 features, n-gram range (1,2)', 'TF-IDF weights discriminative words higher', 'GloVe: pre-trained 100-d / 300-d word vectors', 'GloVe captures semantic word relationships', 'OOV words handled with random initialization']),
+    ('bi-cpu-fill','#f59e0b','Stage 4: Model Development',
+     'Two models are built and compared. A Logistic Regression baseline trained on TF-IDF features, and an LSTM deep learning model with GloVe embeddings trained via TensorFlow/Keras.',
+     ['LR: scikit-learn, C=1.0, lbfgs solver', 'LR: hyperparameter tuning via cross-validation', 'LSTM: Embedding → LSTM layers → Dropout → Dense(sigmoid)', 'LSTM: Adam optimizer, binary cross-entropy loss', 'LSTM: Early stopping to prevent overfitting', 'LSTM: Model checkpointing saves best weights']),
+    ('bi-bar-chart-fill','#ef4444','Stage 5: Model Evaluation',
+     'Both models are evaluated on the held-out test set (20%). Standard classification metrics are computed and confusion matrices are analyzed to understand error patterns.',
+     ['Accuracy: overall correct classifications', 'Precision: true positives / predicted positives', 'Recall: true positives / actual positives', 'F1-Score: harmonic mean of Precision & Recall', 'Confusion matrix: TP, TN, FP, FN analysis', 'LR expected: 82–85% | LSTM expected: 90–93%']),
+  ] %}
+
+  <div class="row g-4">
+    {% for icon, color, title, desc, points in steps %}
+    <div class="col-12">
+      <div class="card p-4">
+        <div class="row align-items-start g-3">
+          <div class="col-auto">
+            <div style="width:56px;height:56px;background:{{ color }}22;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:{{ color }};">
+              <i class="bi {{ icon }}"></i>
+            </div>
+          </div>
+          <div class="col">
+            <h5 class="fw-bold mb-2" style="color:{{ color }};">{{ title }}</h5>
+            <p style="color:var(--text-muted);font-size:.9rem;line-height:1.7;margin-bottom:1rem;">{{ desc|safe }}</p>
+            <div class="row g-2">
+              {% for point in points %}
+              <div class="col-md-6">
+                <div class="d-flex align-items-start gap-2">
+                  <i class="bi bi-check2 mt-1 flex-shrink-0" style="color:{{ color }};"></i>
+                  <span style="font-size:.85rem;color:var(--text-main);">{{ point }}</span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Tools summary table -->
+  <div class="card mt-5">
+    <div class="card-header"><i class="bi bi-table me-2"></i>Table 7.2 — Methodology Stages and Tools Summary</div>
+    <div class="card-body p-0">
+      <table class="table table-dark table-bordered mb-0" style="font-size:.85rem;">
+        <thead style="background:rgba(255,255,255,.06);">
+          <tr>
+            <th class="ps-3 py-3">#</th>
+            <th>Stage</th>
+            <th>Description</th>
+            <th>Tools / Techniques</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in [
+            ('1','Data Collection','Labeled social media posts','Kaggle CSV / Reddit Dataset'),
+            ('2','Data Preprocessing','Lowercase, punctuation removal, tokenization','NLTK / Python re, string'),
+            ('3','Feature Extraction','Text → numerical vectors','TF-IDF Vectorizer / GloVe'),
+            ('4','ML Model Dev.','Logistic Regression baseline','Scikit-learn (Python)'),
+            ('5','LSTM Model Dev.','LSTM with word embeddings','TensorFlow / Keras'),
+            ('6','Evaluation','Accuracy, Precision, Recall, F1','Python / Google Colab'),
+          ] %}
+          <tr>
+            <td class="ps-3">{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td style="color:var(--text-muted);">{{ row[2] }}</td>
+            <td><span class="mono" style="font-size:.8rem;color:#818cf8;">{{ row[3] }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

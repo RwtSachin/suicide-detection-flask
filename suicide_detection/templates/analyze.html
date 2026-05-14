@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}Analyze Text{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- Left: Input -->
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pencil-square" style="color:var(--primary)"></i>
+          Text Analysis
+        </div>
+        <div class="card-body p-4">
+          <label class="form-label" style="color:var(--text-muted);font-size:.85rem;">
+            Enter social media post or text to analyze
+          </label>
+          <textarea id="inputText" class="form-control mb-3"
+            style="background:#0f172a;border-color:var(--border);color:var(--text-main);min-height:220px;resize:vertical;font-size:.93rem;line-height:1.7;"
+            placeholder="Paste or type a social media post here...&#10;&#10;Example: 'I feel so hopeless lately, nothing seems worth it anymore...'"></textarea>
+
+          <!-- Sample texts -->
+          <div class="mb-3">
+            <div style="color:var(--text-muted);font-size:.8rem;margin-bottom:.5rem;">Load sample:</div>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-sm btn-outline-secondary" onclick="loadSample('suicidal')">
+                <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>Suicidal Sample
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="loadSample('non_suicidal')">
+                <i class="bi bi-check-circle-fill text-success me-1"></i>Normal Sample
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="clearAll()">
+                <i class="bi bi-trash me-1"></i>Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary flex-grow-1" id="analyzeBtn" onclick="analyzeText()">
+              <i class="bi bi-search-heart me-2"></i>Analyze Text
+            </button>
+            <button class="btn btn-outline-light" onclick="document.getElementById('inputText').value=''">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="mt-3">
+            <small style="color:var(--text-muted);">
+              <i class="bi bi-keyboard me-1"></i>Ctrl+Enter to analyze
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="col-lg-6">
+      <!-- Loading state -->
+      <div id="loadingState" class="card h-100 d-none">
+        <div class="card-body d-flex align-items-center justify-content-center" style="min-height:300px;">
+          <div class="text-center">
+            <div class="spinner-border mb-3" style="color:var(--primary);width:2.5rem;height:2.5rem;"></div>
+            <div style="color:var(--text-muted);">Running NLP pipeline...</div>
+            <div style="color:var(--text-muted);font-size:.8rem;margin-top:.5rem;">Preprocessing → TF-IDF → Classification</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="card h-100">
+        <div class="card-body d-flex align-items-center justify-content-center" style="min-height:300px;">
+          <div class="text-center">
+            <i class="bi bi-brain fs-1 mb-3" style="color:var(--border);"></i>
+            <div style="color:var(--text-muted);">Enter text on the left and click Analyze</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result state -->
+      <div id="resultState" class="d-none">
+        <div class="card mb-3" id="mainResult"></div>
+        <div class="card mb-3" id="featureCard"></div>
+        <div class="card" id="metaCard"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer-box mt-4">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Important Disclaimer:</strong> This tool is an academic research prototype (B.Tech Project-I, 2026).
+    It is <strong>NOT</strong> a clinical diagnostic tool and must not replace professional psychological assessment.
+    If you or someone you know is in crisis, please immediately contact
+    <strong>iCall: 9152987821</strong> or <strong>Vandrevala Foundation: 1860-2662-345</strong> (24/7, India).
+  </div>
+</div>
+
+<script>
+const samples = {
+  suicidal: "I feel so hopeless and empty inside. I've been thinking that everyone would be better off without me around. I don't see any point in continuing anymore, the pain is just too much to bear. I've been writing goodbye letters to people I care about.",
+  non_suicidal: "I've been feeling really stressed about my upcoming exams and things have been tough lately at home, but I know I'll get through it. Talking to my friends always helps and I'm going to see my therapist next week. Tomorrow will be better."
+};
+
+function loadSample(type) {
+  document.getElementById('inputText').value = samples[type];
+}
+
+function clearAll() {
+  document.getElementById('inputText').value = '';
+  document.getElementById('emptyState').classList.remove('d-none');
+  document.getElementById('resultState').classList.add('d-none');
+}
+
+async function analyzeText() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) return;
+
+  document.getElementById('emptyState').classList.add('d-none');
+  document.getElementById('resultState').classList.add('d-none');
+  document.getElementById('loadingState').classList.remove('d-none');
+  document.getElementById('analyzeBtn').disabled = true;
+
+  try {
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+
+    document.getElementById('loadingState').classList.add('d-none');
+
+    if (data.error) {
+      document.getElementById('emptyState').classList.remove('d-none');
+      alert('Error: ' + data.error);
+      return;
+    }
+
+    renderResult(data);
+    document.getElementById('resultState').classList.remove('d-none');
+  } catch (e) {
+    document.getElementById('loadingState').classList.add('d-none');
+    document.getElementById('emptyState').classList.remove('d-none');
+    console.error('Fetch error:', e);
+    let msg = 'Analysis failed.\n\n';
+    if (e instanceof TypeError && e.message.includes('fetch')) {
+      msg += 'Could not reach the server.\nMake sure Flask is running:\n  python app.py\nThen open: http://localhost:5000';
+    } else {
+      msg += 'Error: ' + e.message;
+    }
+    alert(msg);
+  } finally {
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+function renderResult(data) {
+  const riskColors = { HIGH: '#f87171', MODERATE: '#fbbf24', LOW: '#34d399' };
+  const riskBg = { HIGH: 'rgba(239,68,68,0.1)', MODERATE: 'rgba(245,158,11,0.1)', LOW: 'rgba(16,185,129,0.1)' };
+  const riskBorder = { HIGH: 'rgba(239,68,68,0.35)', MODERATE: 'rgba(245,158,11,0.35)', LOW: 'rgba(16,185,129,0.35)' };
+  const color = riskColors[data.risk_level];
+
+  // Main result card
+  document.getElementById('mainResult').innerHTML = `
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-clipboard-data me-2"></i>Analysis Result</span>
+      <span style="font-size:.8rem;color:var(--text-muted);">${data.processing_time_ms}ms</span>
+    </div>
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <div style="font-size:3rem;margin-bottom:.5rem;">${data.risk_level === 'HIGH' ? '🚨' : data.risk_level === 'MODERATE' ? '⚠️' : '✅'}</div>
+        <h4 class="fw-bold" style="color:${color};">${data.label}</h4>
+        <div class="risk-badge risk-${data.risk_level.toLowerCase()} mx-auto mb-3">${data.risk_level} RISK</div>
+      </div>
+
+      <div class="row g-3 text-center mb-4">
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700;color:${color};">${data.suicidal_probability}%</div>
+          <div style="color:var(--text-muted);font-size:.75rem;">Suicidal Prob.</div>
+        </div>
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700;color:#34d399;">${data.non_suicidal_probability}%</div>
+          <div style="color:var(--text-muted);font-size:.75rem;">Non-Suicidal Prob.</div>
+        </div>
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700;color:#818cf8;">${data.confidence}%</div>
+          <div style="color:var(--text-muted);font-size:.75rem;">Confidence</div>
+        </div>
+      </div>
+
+      <div class="mb-2 d-flex justify-content-between">
+        <small style="color:var(--text-muted);">Non-Suicidal</small>
+        <small style="color:var(--text-muted);">Suicidal</small>
+      </div>
+      <div class="progress" style="height:12px;border-radius:6px;">
+        <div class="progress-bar" style="width:${data.suicidal_probability}%;background:linear-gradient(90deg,#10b981,${color});border-radius:6px;"></div>
+      </div>
+    </div>`;
+
+  // Linguistic features card
+  const f = data.linguistic_features;
+  document.getElementById('featureCard').innerHTML = `
+    <div class="card-header"><i class="bi bi-graph-up me-2"></i>Linguistic Feature Analysis</div>
+    <div class="card-body p-4">
+      ${[
+        ['Hopelessness Score', f.hopelessness_score, '#f87171'],
+        ['Negative Emotion Score', f.negative_emotion_score, '#fbbf24'],
+        ['Self-Referential Language', f.self_referential_score, '#818cf8']
+      ].map(([label, val, clr]) => `
+        <div class="d-flex justify-content-between mb-1">
+          <small style="color:var(--text-muted);">${label}</small>
+          <small style="color:${clr};font-weight:600;">${val}%</small>
+        </div>
+        <div class="progress mb-3">
+          <div class="progress-bar" style="width:${Math.min(val*3,100)}%;background:${clr};"></div>
+        </div>`).join('')}
+      <div class="d-flex gap-3 mt-2">
+        <span class="badge" style="background:rgba(255,255,255,.08);color:var(--text-muted);">
+          <i class="bi bi-exclamation-circle me-1"></i>Direct indicators: ${f.direct_ideation_count}
+        </span>
+        <span class="badge" style="background:rgba(255,255,255,.08);color:var(--text-muted);">
+          <i class="bi bi-text-left me-1"></i>Words: ${f.text_length}
+        </span>
+      </div>
+    </div>`;
+
+  // Meta card
+  document.getElementById('metaCard').innerHTML = `
+    <div class="card-body p-3">
+      <div style="font-size:.78rem;color:var(--text-muted);" class="mb-2">
+        <i class="bi bi-cpu me-1"></i>Model: ${data.model}
+      </div>
+      <div style="font-size:.78rem;" class="mb-2">
+        <strong>Preprocessed text:</strong>
+        <div class="mt-1 p-2 rounded mono" style="background:#0f172a;font-size:.73rem;color:#94a3b8;max-height:60px;overflow-y:auto;">
+          ${data.processed_text || '(empty after preprocessing)'}
+        </div>
+      </div>
+    </div>`;
+}
+
+document.getElementById('inputText').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') analyzeText();
+});
+</script>
+{% endblock %}

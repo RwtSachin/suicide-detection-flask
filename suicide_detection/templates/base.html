@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SuicidalIdeation Detector{% endblock %} | AI Mental Health</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --secondary: #0ea5e9;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --dark-bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--dark-bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    /* Navbar */
+    .navbar {
+      background: rgba(15,23,42,0.95) !important;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      padding: 0.75rem 1.5rem;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main) !important;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .navbar-brand .brand-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .nav-link { color: var(--text-muted) !important; font-size: 0.9rem; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { color: var(--text-main) !important; }
+    .nav-link.active { border-bottom: 2px solid var(--primary); }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+    /* Risk badges */
+    .risk-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 1rem; border-radius: 50px;
+      font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;
+    }
+    .risk-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .risk-moderate { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .risk-low { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+
+    /* Progress bars */
+    .progress { background: var(--border); height: 8px; border-radius: 4px; }
+
+    /* Footer */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 4rem;
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Glow effect */
+    .glow-primary { box-shadow: 0 0 20px rgba(79,70,229,0.3); }
+
+    /* Stat card */
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-value { font-size: 2rem; font-weight: 700; }
+    .stat-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Disclaimer */
+    .disclaimer-box {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.82rem;
+      color: #fca5a5;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <span class="brand-icon">🧠</span>
+        <span>MindScan AI</span>
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="bi bi-list text-light fs-4"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto gap-1">
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='index' %}active{% endif %}" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='analyze' %}active{% endif %}" href="/analyze">Analyze</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='methodology' %}active{% endif %}" href="/methodology">Methodology</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.endpoint=='about' %}active{% endif %}" href="/about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div>
+      <strong>MindScan AI</strong> — Deep Learning-Based Detection of Suicidal Tendencies From Social Media Content
+    </div>
+    <div class="mt-1">
+      Rahul Kumar Rana | Roll No. 2320128 | B.Tech CSE (2023–2027) | CGC College of Engineering, Landran
+    </div>
+    <div class="mt-2" style="color: #ef4444;">
+      ⚠️ This is an academic research prototype only. Not for clinical use.
+      If in crisis: <strong>iCall: 9152987821</strong> | <strong>Vandrevala Foundation: 1860-2662-345</strong>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

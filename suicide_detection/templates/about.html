@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-8">
+      <h4 class="fw-bold mb-1">About This Project</h4>
+      <p style="color:var(--text-muted);margin-bottom:2rem;">Academic B.Tech Project-I Report · CGC College of Engineering, Landran</p>
+
+      <div class="card p-4 mb-4">
+        <h5 class="fw-semibold mb-3" style="color:var(--secondary);">Abstract</h5>
+        <p style="color:var(--text-muted);font-size:.92rem;line-height:1.8;">
+          Suicide is a serious global public health concern with approximately 700,000 lives lost annually (WHO, 2021).
+          This project proposes an automated system for detecting suicidal ideation from social media textual data
+          using <strong style="color:var(--text-main);">Natural Language Processing (NLP)</strong> and
+          <strong style="color:var(--text-main);">deep learning techniques</strong>.
+        </p>
+        <p style="color:var(--text-muted);font-size:.92rem;line-height:1.8;margin:0;">
+          The system analyzes posts and classifies them as suicidal or non-suicidal based on linguistic patterns,
+          emotional indicators, and contextual information. The methodology includes five stages: data collection,
+          preprocessing, TF-IDF and GloVe feature extraction, Logistic Regression and LSTM model development,
+          and evaluation using accuracy, precision, recall, and F1-score.
+        </p>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <h5 class="fw-semibold mb-3" style="color:var(--secondary);">Objectives</h5>
+        <ul style="color:var(--text-muted);font-size:.9rem;line-height:2;padding-left:1.2rem;margin:0;">
+          <li>Collect and preprocess textual data from publicly available suicide ideation datasets</li>
+          <li>Implement a Logistic Regression baseline model using TF-IDF feature extraction</li>
+          <li>Develop an LSTM deep learning model using GloVe word embeddings</li>
+          <li>Evaluate and compare models using accuracy, precision, recall, F1-score</li>
+          <li>Demonstrate practical AI application for mental health monitoring</li>
+          <li>Document ethical AI framework for responsible deployment</li>
+        </ul>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <h5 class="fw-semibold mb-3" style="color:#f87171;">
+          <i class="bi bi-shield-exclamation me-2"></i>Ethical Framework & Limitations
+        </h5>
+        <p style="color:var(--text-muted);font-size:.9rem;line-height:1.8;margin-bottom:.75rem;">
+          This system was designed with ethical AI principles at its core:
+        </p>
+        <div class="row g-2">
+          {% for point, icon in [
+            ('Uses anonymized, publicly available Kaggle data', 'bi-lock-fill'),
+            ('No individual user identification is performed', 'bi-person-x-fill'),
+            ('Designed as a research support tool only', 'bi-tools'),
+            ('Must NOT replace professional assessment', 'bi-exclamation-circle-fill'),
+            ('False positives/negatives are acknowledged', 'bi-info-circle-fill'),
+            ('Human oversight is essential in deployment', 'bi-people-fill'),
+          ] %}
+          <div class="col-md-6">
+            <div class="d-flex align-items-start gap-2">
+              <i class="bi {{ icon }} mt-1 flex-shrink-0" style="color:#f87171;"></i>
+              <span style="font-size:.85rem;color:var(--text-main);">{{ point }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card p-4">
+        <h5 class="fw-semibold mb-3" style="color:var(--secondary);">Key References</h5>
+        <ol style="color:var(--text-muted);font-size:.83rem;line-height:2;padding-left:1.2rem;margin:0;">
+          <li>Tadesse et al. (2019) — LSTM for suicide ideation on Reddit, ~92% accuracy</li>
+          <li>Aldhyani et al. (2022) — Hybrid CNN-BiLSTM model for social media detection</li>
+          <li>Coppersmith et al. (2018) — NLP baselines for mental health on Twitter</li>
+          <li>Hochreiter & Schmidhuber (1997) — LSTM architecture</li>
+          <li>Devlin et al. (2019) — BERT pre-training for NLP</li>
+          <li>WHO (2021) — Suicide Worldwide: Global Health Estimates</li>
+          <li>Kaggle Dataset — nikhileswarkomati/suicide-watch</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <div class="card p-4 mb-4" style="border-color:rgba(79,70,229,.4);">
+        <div class="text-center mb-3">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:auto;">
+            👨‍💻
+          </div>
+        </div>
+        <div class="text-center">
+          <h5 class="fw-bold mb-1">Rahul Kumar Rana</h5>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:.5rem;">Student Author</div>
+          <div class="badge mb-3" style="background:rgba(79,70,229,.2);color:#818cf8;">Roll No. 2320128</div>
+          <div style="font-size:.85rem;color:var(--text-muted);line-height:1.7;">
+            B.Tech in Computer Science &amp; Engineering<br>
+            Semester: 6th | Batch: 2023–2027<br>
+            CGC College of Engineering, Landran<br>
+            Mohali, Punjab – 140307
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <h6 class="fw-semibold mb-3">Project Supervisor</h6>
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:44px;height:44px;background:rgba(14,165,233,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">👩‍🏫</div>
+          <div>
+            <div class="fw-semibold" style="font-size:.9rem;">Ms. Seema Rani</div>
+            <div style="color:var(--text-muted);font-size:.78rem;">Assistant Professor, Dept. of CSE</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <h6 class="fw-semibold mb-3">Tech Stack</h6>
+        {% for tech, color in [
+          ('Python 3.x', '#f59e0b'),
+          ('Flask (Web Framework)', '#10b981'),
+          ('Scikit-learn (LR/TF-IDF)', '#0ea5e9'),
+          ('TensorFlow / Keras (LSTM)', '#ef4444'),
+          ('NLTK (Preprocessing)', '#8b5cf6'),
+          ('Bootstrap 5 (UI)', '#6366f1'),
+          ('Chart.js (Visualization)', '#ec4899'),
+          ('Kaggle Dataset (Reddit)', '#f97316'),
+        ] %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span style="font-size:.82rem;color:var(--text-main);">{{ tech }}</span>
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ color }};display:inline-block;"></span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="disclaimer-box">
+        <strong>Crisis Support (India)</strong><br>
+        <i class="bi bi-telephone-fill me-1"></i><strong>iCall:</strong> 9152987821<br>
+        <i class="bi bi-telephone-fill me-1"></i><strong>Vandrevala Foundation:</strong> 1860-2662-345<br>
+        <div style="font-size:.75rem;margin-top:.5rem;">Available 24/7</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">Model Dashboard</h4>
+      <p style="color:var(--text-muted);font-size:.88rem;margin:0;">Performance metrics and analysis history</p>
+    </div>
+    <button class="btn btn-outline-light btn-sm" onclick="retrainModel()">
+      <i class="bi bi-arrow-clockwise me-1"></i>Retrain Model
+    </button>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="row g-3 mb-4">
+    {% set model_data = metrics.lr_model %}
+    {% for label, val, icon, color in [
+      ('Accuracy (LR)', model_data.accuracy|string + '%', 'bi-bullseye', '#0ea5e9'),
+      ('Precision', model_data.precision|string + '%', 'bi-check2-circle', '#10b981'),
+      ('Recall', model_data.recall|string + '%', 'bi-search', '#f59e0b'),
+      ('F1-Score', model_data.f1_score|string + '%', 'bi-trophy-fill', '#ef4444'),
+    ] %}
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <i class="bi {{ icon }} fs-4 mb-2" style="color:{{ color }};"></i>
+        <div class="stat-value" style="color:{{ color }}; font-size:1.8rem;">{{ val }}</div>
+        <div class="stat-label">{{ label }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Charts row -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-bar-chart-fill me-2"></i>LR vs LSTM — Expected Performance
+        </div>
+        <div class="card-body p-3">
+          <canvas id="comparisonChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-pie-chart-fill me-2"></i>Predicted Class Distribution (Demo)
+        </div>
+        <div class="card-body p-3">
+          <canvas id="distChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confusion Matrix -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-grid-3x3 me-2"></i>Confusion Matrix (Estimated)</div>
+        <div class="card-body p-4">
+          <div class="row g-2 text-center" style="max-width:280px;margin:auto;">
+            <div class="col-6">
+              <div style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:1rem;">
+                <div class="fw-bold fs-4" style="color:#34d399;">94</div>
+                <div style="color:var(--text-muted);font-size:.75rem;">True Negative</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:1rem;">
+                <div class="fw-bold fs-4" style="color:#f87171;">6</div>
+                <div style="color:var(--text-muted);font-size:.75rem;">False Positive</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:1rem;">
+                <div class="fw-bold fs-4" style="color:#fbbf24;">8</div>
+                <div style="color:var(--text-muted);font-size:.75rem;">False Negative</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:1rem;">
+                <div class="fw-bold fs-4" style="color:#34d399;">92</div>
+                <div style="color:var(--text-muted);font-size:.75rem;">True Positive</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center gap-4 mt-3">
+            <span style="font-size:.75rem;color:var(--text-muted);">Predicted: Non-Suicidal ←</span>
+            <span style="font-size:.75rem;color:var(--text-muted);">→ Suicidal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-clock-history me-2"></i>Recent Analyses</div>
+        <div class="card-body p-0">
+          <div id="historyContainer" style="max-height:280px;overflow-y:auto;">
+            {% if history %}
+              {% for entry in history %}
+              <div class="p-3" style="border-bottom:1px solid var(--border);">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-main);">
+                      {{ entry.text_preview }}
+                    </div>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">{{ entry.timestamp }}</div>
+                  </div>
+                  <span class="ms-2 risk-badge risk-{{ entry.risk_level.lower() }}" style="white-space:nowrap;flex-shrink:0;font-size:.7rem;padding:.3rem .7rem;">
+                    {{ entry.risk_level }}
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="p-4 text-center" style="color:var(--text-muted);">
+                <i class="bi bi-clock fs-3 mb-2 d-block"></i>No analyses yet. <a href="/analyze">Try analyzing text</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model details table -->
+  <div class="card">
+    <div class="card-header"><i class="bi bi-table me-2"></i>Model Specifications</div>
+    <div class="card-body p-0">
+      <table class="table table-dark table-hover mb-0" style="font-size:.88rem;">
+        <thead style="background:rgba(255,255,255,.05);">
+          <tr>
+            <th class="ps-4 py-3">Model</th>
+            <th>Feature Method</th>
+            <th>Accuracy</th>
+            <th>F1-Score</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ps-4">Logistic Regression</td>
+            <td><span class="mono" style="font-size:.8rem;color:#38bdf8;">TF-IDF (5000 features)</span></td>
+            <td>82–85%</td>
+            <td>0.80–0.83</td>
+            <td><span class="badge" style="background:rgba(14,165,233,.2);color:#38bdf8;">Baseline ML</span></td>
+          </tr>
+          <tr>
+            <td class="ps-4">LSTM Network</td>
+            <td><span class="mono" style="font-size:.8rem;color:#818cf8;">GloVe Embeddings</span></td>
+            <td>90–93%</td>
+            <td>0.88–0.92</td>
+            <td><span class="badge" style="background:rgba(79,70,229,.2);color:#818cf8;">Deep Learning</span></td>
+          </tr>
+          <tr>
+            <td class="ps-4">CNN-BiLSTM</td>
+            <td><span class="mono" style="font-size:.8rem;color:#f472b6;">Bidirectional Embeddings</span></td>
+            <td>~93–95%</td>
+            <td>0.92–0.94</td>
+            <td><span class="badge" style="background:rgba(244,114,182,.2);color:#f472b6;">Future Work</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Comparison bar chart
+new Chart(document.getElementById('comparisonChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+    datasets: [
+      {
+        label: 'Logistic Regression',
+        data: [83.5, 84.2, 82.8, 83.5],
+        backgroundColor: 'rgba(14,165,233,0.7)',
+        borderColor: '#0ea5e9', borderWidth: 1, borderRadius: 5
+      },
+      {
+        label: 'LSTM (Expected)',
+        data: [91.8, 92.3, 91.4, 91.8],
+        backgroundColor: 'rgba(79,70,229,0.7)',
+        borderColor: '#4f46e5', borderWidth: 1, borderRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+      tooltip: { bodyColor: '#f1f5f9' }
+    },
+    scales: {
+      x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+      y: { ticks: { color: '#94a3b8', callback: v => v + '%' }, grid: { color: '#334155' }, min: 70, max: 100 }
+    }
+  }
+});
+
+// Distribution doughnut
+new Chart(document.getElementById('distChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Non-Suicidal', 'Suicidal'],
+    datasets: [{
+      data: [55, 45],
+      backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)'],
+      borderColor: ['#10b981', '#ef4444'],
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#94a3b8' }, position: 'bottom' }
+    },
+    cutout: '60%'
+  }
+});
+
+async function retrainModel() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Retraining...';
+  try {
+    const res = await fetch('/api/retrain', { method: 'POST' });
+    const data = await res.json();
+    alert(`Model retrained! Accuracy: ${data.metrics?.accuracy || 'N/A'}%`);
+    location.reload();
+  } catch(e) {
+    alert('Retraining failed');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Retrain Model';
+  }
+}
+</script>
+{% endblock %}
